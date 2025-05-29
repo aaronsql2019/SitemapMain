@@ -4,6 +4,7 @@ Imports System.Net.Http
 Imports System.Text.RegularExpressions
 Imports System.Threading.Tasks
 Imports HtmlAgilityPack
+Imports Microsoft.Data.SqlClient
 
 Module Program
     Private ReadOnly ConnectionString As String = "Server=localhost\SQL2022;Database=SitemapFinder;Trusted_Connection=True;"
