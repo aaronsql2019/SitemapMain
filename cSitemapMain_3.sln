@@ -7,6 +7,8 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "pSitemapCrawler", "pSitemap
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "pSitemapGuesser", "pSitemapGuesser\pSitemapGuesser.vbproj", "{D9D26854-8ADA-42E6-9EBE-9627A2F2DE41}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "IPAddress_LookupAndLog", "IPAddress_LookupAndLog\IPAddress_LookupAndLog.vbproj", "{811DFBD6-5BF6-48DA-82EC-92404F8F3BAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{D9D26854-8ADA-42E6-9EBE-9627A2F2DE41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9D26854-8ADA-42E6-9EBE-9627A2F2DE41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9D26854-8ADA-42E6-9EBE-9627A2F2DE41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{811DFBD6-5BF6-48DA-82EC-92404F8F3BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{811DFBD6-5BF6-48DA-82EC-92404F8F3BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{811DFBD6-5BF6-48DA-82EC-92404F8F3BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{811DFBD6-5BF6-48DA-82EC-92404F8F3BAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
