@@ -70,6 +70,7 @@ Module Module1
         Console.ReadKey()
     End Sub
 
+    'sample comment
     ''' <summary>
     ''' Ensures the 'IPLookups' database and its required schema (tables, SP) exist.
     ''' Creates them if they don't.
