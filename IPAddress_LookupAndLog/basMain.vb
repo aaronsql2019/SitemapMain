@@ -1,4 +1,5 @@
-Imports System.Data.SqlClient
+Imports Microsoft.Data.SqlClient
+'Imports System.Data.SqlClient
 Imports System.IO
 
 Module Module1
@@ -10,7 +11,7 @@ Module Module1
         If args.Length <> 3 Then
             Console.WriteLine("Usage: IPLookupApp.exe <ConnectionString> <SQLStatement> <SourceDNSServerForLog>")
             Console.WriteLine(vbCrLf & "Example ConnectionString (ensure it allows connection to master for DB creation check):")
-            Console.WriteLine("""Server=localhost\SQLEXPRESS;Integrated Security=True;TrustServerCertificate=True;""")
+            Console.WriteLine("""Server=localhost\sql2022;Integrated Security=True;Database=IPLookup;TrustServerCertificate=True;""")
             Console.WriteLine(vbCrLf & "Example SQLStatement:")
             Console.WriteLine("""INSERT INTO DomainLookups (DomainURL, IPAddress, SourceDNSServer) VALUES ('example.com', '93.184.216.34', 'dns.example.com')""")
             Console.WriteLine(vbCrLf & "Example SourceDNSServerForLog:")
@@ -26,7 +27,6 @@ Module Module1
             ' Step 1: Ensure the database and its schema exist
             Dim actualIpLookupsConnectionString As String = EnsureDatabaseAndSchema(userConnectionString)
             Console.WriteLine("Database and schema verified/created successfully.")
-
 
             ' Step 2: Execute the provided SQL Statement against IPLookups database
             Using connection As New SqlConnection(actualIpLookupsConnectionString)
@@ -109,6 +109,64 @@ Module Module1
         End If
         Dim actualIpLookupsConnectionString As String = ipLookupsConnectionStringBuilder.ConnectionString
 
+        ' --- Connect to IPLookups database to create schema objects ---
+        Using dbConnection As New SqlConnection(actualIpLookupsConnectionString)
+            dbConnection.Open()
+            Console.WriteLine($"Connected to '{targetDbName}'. Verifying schema...")
+
+            ' --- Check/Create Table DomainLookups ---
+            Dim createDomainLookupsTableSql As String = "
+            IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[DomainLookups]') AND type in (N'U'))
+            BEGIN
+                CREATE TABLE [dbo].[DomainLookups](
+                    [DomainID] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                    [DomainURL] [nvarchar](255) NOT NULL,
+                    [IPAddress] [nvarchar](45) NULL,
+                    [SourceDNSServer] [nvarchar](255) NULL
+                );
+                PRINT 'Table DomainLookups created.';
+            END"
+            ExecuteNonQuery(dbConnection, createDomainLookupsTableSql, "Ensuring DomainLookups table...")
+
+            ' --- Check/Create Table OperationLogs ---
+            Dim createOperationLogsTableSql As String = "
+            IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[OperationLogs]') AND type in (N'U'))
+            BEGIN
+                CREATE TABLE [dbo].[OperationLogs](
+                    [LogID] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                    [LogTimestamp] [datetime] NOT NULL DEFAULT GETDATE(),
+                    [Details] [nvarchar](max) NULL,
+                    [DNSServerUsed] [nvarchar](255) NULL
+                );
+                PRINT 'Table OperationLogs created.';
+            END"
+            ExecuteNonQuery(dbConnection, createOperationLogsTableSql, "Ensuring OperationLogs table...")
+
+            ' --- Check/Create Stored Procedure LogDnsOperation ---
+            Dim createLogDnsOperationSpSql As String = "
+            IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[LogDnsOperation]') AND type in (N'P', N'PC'))
+            BEGIN
+                EXEC('
+                CREATE PROCEDURE [dbo].[LogDnsOperation]
+                    @OperationDetails NVARCHAR(MAX),
+                    @ServerUsed NVARCHAR(255)
+                AS
+                BEGIN
+                    SET NOCOUNT ON;
+                    INSERT INTO [dbo].[OperationLogs] (Details, DNSServerUsed)
+                    VALUES (@OperationDetails, @ServerUsed);
+                END
+                ');
+                PRINT 'Stored Procedure LogDnsOperation created.';
+            END"
+            ExecuteNonQuery(dbConnection, createLogDnsOperationSpSql, "Ensuring LogDnsOperation stored procedure...")
+        End Using
+        Return actualIpLookupsConnectionString
+    End Function
+
+    ''' <summary>
+    ''' Helper function to execute a non-query SQL command.
+    ''' </summary>
     Private Sub ExecuteNonQuery(ByVal connection As SqlConnection, ByVal commandText As String, ByVal message As String)
         Console.WriteLine(message)
         Using command As New SqlCommand(commandText, connection)

@@ -15,7 +15,7 @@ Module Program
             ' Configuration
             Dim sitemapUrl As String = "https://example.com/sitemap.xml" ' Replace with target sitemap URL
             Dim csvFilePath As String = "sitemap_output.csv"
-            Dim connectionString As String = "Server=localhost\SQL2022;Database=SitemapScanner;Trusted_Connection=True;"
+            Dim connectionString As String = "Server=localhost\SQL2022;Database=SitemapScanner;Trusted_Connection=True;TrustServerCertificate=True;"
             Dim csvDelimiter As String = ","
 
             ' Await the async method

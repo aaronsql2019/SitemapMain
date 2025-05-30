@@ -7,7 +7,7 @@ Imports HtmlAgilityPack
 Imports Microsoft.Data.SqlClient
 
 Module Program
-    Private ReadOnly ConnectionString As String = "Server=localhost\SQL2022;Database=SitemapFinder;Trusted_Connection=True;"
+    Private ReadOnly ConnectionString As String = "Server=localhost\SQL2022;Database=SitemapFinder;Trusted_Connection=True;TrustServerCertificate=True;"
     Private ReadOnly HttpClient As New HttpClient()
     Private ReadOnly GoogleSearchUrl As String = "https://www.google.com/search?q=site:{0}+filetype:xml+sitemap"
 
