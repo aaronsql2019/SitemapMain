@@ -1,14 +1,16 @@
 Imports System
 Imports System.Data
-Imports System.Data.SqlClient
 Imports System.IO
 Imports System.Net
+Imports System.Net.Http
 Imports System.Text
 Imports System.Xml
+Imports Microsoft.Data.SqlClient
 Imports Microsoft.VisualBasic.FileIO
 
 Module Program
-    Sub Main(args As String())
+    ' Change Sub Main to Async Function Main and return Task
+    Async Function Main() As Task
         Try
             ' Configuration
             Dim sitemapUrl As String = "https://example.com/sitemap.xml" ' Replace with target sitemap URL
@@ -16,8 +18,8 @@ Module Program
             Dim connectionString As String = "Server=localhost\SQL2022;Database=SitemapScanner;Trusted_Connection=True;"
             Dim csvDelimiter As String = ","
 
-            ' Parse sitemap and write to CSV
-            ParseSitemapToCsv(sitemapUrl, csvFilePath, csvDelimiter)
+            ' Await the async method
+            Await ParseSitemapToCsvAsync(sitemapUrl, csvFilePath, csvDelimiter)
 
             ' Bulk insert CSV to SQL Server
             BulkInsertToSqlServer(csvFilePath, connectionString)
@@ -26,12 +28,15 @@ Module Program
         Catch ex As Exception
             Console.WriteLine("Error: " & ex.Message)
         End Try
-    End Sub
+    End Function
 
-    Sub ParseSitemapToCsv(sitemapUrl As String, csvFilePath As String, delimiter As String)
-        ' Download and parse sitemap XML
-        Dim client As New WebClient()
-        Dim xmlContent As String = client.DownloadString(sitemapUrl)
+    Async Function ParseSitemapToCsvAsync(sitemapUrl As String, csvFilePath As String, delimiter As String) As Task
+        ' Download and parse sitemap XML using HttpClient
+        Dim xmlContent As String
+        Using client As New HttpClient()
+            xmlContent = Await client.GetStringAsync(sitemapUrl)
+        End Using
+
         Dim xmlDoc As New XmlDocument()
         xmlDoc.LoadXml(xmlContent)
 
@@ -69,7 +74,7 @@ Module Program
                 End If
             Next
         End Using
-    End Sub
+    End Function
 
     Sub BulkInsertToSqlServer(csvFilePath As String, connectionString As String)
         Using conn As New SqlConnection(connectionString)
